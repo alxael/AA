@@ -1,1 +1,3 @@
 teme/genetics/data/
+build/*
+.vscode
