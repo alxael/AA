@@ -16,7 +16,7 @@ bool compare(const Point &p1, const Point &p2)
 {
     return ((p1.first < p2.first) || (p1.first == p2.first && p1.second < p2.second));
 }
-bool compare_convex(const Point &p1, const Point &p2)
+bool compareConvex(const Point &p1, const Point &p2)
 {
     long long value = orientation(start, p1, p2);
     if (value != 0)
@@ -42,7 +42,7 @@ int main()
     sort(points.begin(), points.end(), compare);
     start = points[0];
 
-    sort(points.begin() + 1, points.end(), compare_convex);
+    sort(points.begin() + 1, points.end(), compareConvex);
 
     vector<Point> stack;
     stack.push_back(points[0]);
