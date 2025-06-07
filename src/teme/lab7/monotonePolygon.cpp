@@ -1,109 +1,68 @@
 #include <iostream>
 #include <vector>
-#include <algorithm>
-#include <cmath>
-#include <cfloat>
-
 using namespace std;
 
-using Point = pair<long long, long long>;
+using Point = pair<int, int>;
 
-bool isXMonotone(const vector<Point> &polygon)
+bool nonDecreasing(const vector<Point> &chain, int coordIndex)
 {
-    if (polygon.size() < 3)
-        return true;
-    int leftmost = 0, rightmost = 0;
-    for (int index = 1; index < polygon.size(); index++)
+    for (size_t i = 0; i + 1 < chain.size(); i++)
     {
-        if (polygon[index].first < polygon[leftmost].first ||
-            (polygon[index].first == polygon[leftmost].first && polygon[index].second < polygon[leftmost].second))
-            leftmost = index;
-        if (polygon[index].first > polygon[rightmost].first ||
-            (polygon[index].first == polygon[rightmost].first && polygon[index].second > polygon[rightmost].second))
-            rightmost = index;
+        int curr = (coordIndex == 0) ? chain[i].first : chain[i].second;
+        int next = (coordIndex == 0) ? chain[i + 1].first : chain[i + 1].second;
+        if (curr > next)
+            return false;
     }
-    if (leftmost == rightmost)
-        return true;
-    vector<Point> upperChain;
-    int current = leftmost;
-    do
-    {
-        upperChain.push_back(polygon[current]);
-        current = (current + 1) % polygon.size();
-    } while (current != rightmost);
-    upperChain.push_back(polygon[rightmost]);
-    for (size_t index = 1; index < upperChain.size(); index++)
-        if (upperChain[index].first < upperChain[index - 1].first)
-            return false;
-    vector<Point> lowerChain;
-    current = rightmost;
-    do
-    {
-        lowerChain.push_back(polygon[current]);
-        current = (current + 1) % polygon.size();
-    } while (current != leftmost);
-    lowerChain.push_back(polygon[leftmost]);
-    for (size_t index = 1; index < lowerChain.size(); index++)
-        if (lowerChain[index].first > lowerChain[index - 1].first)
-            return false;
     return true;
 }
 
-bool isYMonotone(const vector<Point> &polygon)
+bool isMonotone(const vector<Point> &points, int coordIndex)
 {
-    if (polygon.size() < 3)
-        return true;
-    int topmost = 0, bottommost = 0;
-    for (int index = 1; index < polygon.size(); index++)
+    int n = (int)points.size();
+    int minIndex = 0, maxIndex = 0;
+    for (int i = 1; i < n; i++)
     {
-        if (polygon[index].second > polygon[topmost].second ||
-            (polygon[index].second == polygon[topmost].second && polygon[index].first < polygon[topmost].first))
-            topmost = index;
-        if (polygon[index].second < polygon[bottommost].second ||
-            (polygon[index].second == polygon[bottommost].second && polygon[index].first > polygon[bottommost].first))
-            bottommost = index;
+        if ((coordIndex == 0 && points[i].first < points[minIndex].first) ||
+            (coordIndex == 1 && points[i].second < points[minIndex].second))
+        {
+            minIndex = i;
+        }
+        if ((coordIndex == 0 && points[i].first > points[maxIndex].first) ||
+            (coordIndex == 1 && points[i].second > points[maxIndex].second))
+        {
+            maxIndex = i;
+        }
     }
-    if (topmost == bottommost)
-        return true;
-    vector<Point> leftChain;
-    int current = topmost;
-    do
+
+    vector<Point> chain1;
+    for (int i = minIndex; i != maxIndex; i = (i + 1) % n)
     {
-        leftChain.push_back(polygon[current]);
-        current = (current + 1) % polygon.size();
-    } while (current != bottommost);
-    leftChain.push_back(polygon[bottommost]);
-    for (size_t index = 1; index < leftChain.size(); index++)
-        if (leftChain[index].second > leftChain[index - 1].second)
-            return false;
-    vector<Point> rightChain;
-    current = bottommost;
-    do
+        chain1.push_back(points[i]);
+    }
+
+    vector<Point> chain2;
+    for (int i = minIndex; i != maxIndex; i = (i - 1 + n) % n)
     {
-        rightChain.push_back(polygon[current]);
-        current = (current + 1) % polygon.size();
-    } while (current != topmost);
-    rightChain.push_back(polygon[topmost]);
-    for (size_t index = 1; index < rightChain.size(); index++)
-        if (rightChain[index].second < rightChain[index - 1].second)
-            return false;
-    return true;
+        chain2.push_back(points[i]);
+    }
+
+    return nonDecreasing(chain1, coordIndex) && nonDecreasing(chain2, coordIndex);
 }
 
 int main()
 {
-    int pointCount;
-    vector<Point> polygon;
+    int n;
     Point point;
 
-    cin >> pointCount;
-    for (int index = 1; index <= pointCount; index++)
+    cin >> n;
+    vector<Point> points(n);
+    for (int i = 0; i < n; i++)
     {
-        cin >> point.first >> point.second;
-        polygon.push_back(point);
+        cin >> points[i].first >> points[i].second;
     }
 
-    cout << (isXMonotone(polygon) ? "YES" : "NO") << '\n';
-    cout << (isYMonotone(polygon) ? "YES" : "NO") << '\n';
+    cout << (isMonotone(points, 0) ? "YES" : "NO") << '\n';
+    cout << (isMonotone(points, 1) ? "YES" : "NO") << '\n';
+
     return 0;
 }
